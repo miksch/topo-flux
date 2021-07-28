@@ -56,11 +56,11 @@ def double_rotate(df, u, v, w):
     return df, theta, phi
 
 #@jit
-def pitch_correct(wind_vect):
+def pitch_correct(wind_vect, return_angle=False):
 
     """
     Assumes wind vector is [:,3] shape (need to add check on)
-    Zeros out v-vector
+    Zeros out w-vector
     """
     u_mean = np.nanmean(wind_vect[:,0])
     w_mean = np.nanmean(wind_vect[:,2])
@@ -71,15 +71,16 @@ def pitch_correct(wind_vect):
                         [0, 1, 0],
                         [w_ele, 0, u_ele]])
 
+    # Apply rotation
     rotated = np.dot(wind_vect, A_pitch)
 
     return rotated
 
 #@jit 
-def yaw_correct(wind_vect):
+def yaw_correct(wind_vect, return_angle=False):
     
     """
-    Zeros out w-vector
+    Zeros out v-vector
     """
 
     u_mean = np.nanmean(wind_vect[:,0])
@@ -90,17 +91,54 @@ def yaw_correct(wind_vect):
     A_yaw = np.array([[u_ele, -v_ele, 0],
                       [v_ele, u_ele, 0],
                       [0, 0, 1]])
+    
+    # Apply rotation
     rotated = np.dot(wind_vect, A_yaw)
     
     return rotated
 
-def pd_double_rotate(df, u_pref, v_pref, w_pref, time_freq):
 
+
+def yaw_angle(u, v):
+    """
+    Returns yaw angle given two vectors: u and v
+    """
+
+    return np.arctan(u/v)
+
+def pitch_angle(u, v, w):
+    """
+    Returns pitch angle given angles u, v, and w
+    """
+
+    return np.arctan(w/(u**2 + v**2 + w**2))
+
+def _double_rotate_pd_rotations(df):
+    """
+    Function to rotate winds
+    """
+
+    wind_vect0 = df.values
+    wind_vect1 = yaw_correct(wind_vect0)
+    wind_vect2 = pitch_correct(wind_vect1)
+
+    new_cols = [f'{c}_dr' for c in df.columns]
+
+    return pd.DataFrame(wind_vect2, index=df.index, columns=new_cols)
+
+def double_rotate_pd(df, time_freq, u_meas='Ux', v_meas='Uy', w_meas='Uz', ts_meas='t_sonic'):
+    """
+    Calculate double rotated velocities
+    """
     #Split data into groups dictated by time_freq
-    df_grouped = df.resample(time_freq, closed='right', label='right')
+    # did .groupby(pd.Grouper(freq='5T', closed='right', label='right'), group_keys=False)
+    # in previous code... not sure why
+    df_meas_grouped = df.groupby(pd.Grouper(freq='5T', closed='right', label='right'), group_keys=False)
+    
+    test_grouped = df_meas_grouped.apply(_double_rotate_pd_rotations)
 
+    # Calculate covariances
 
-
-    return
+    return test_grouped
 
 

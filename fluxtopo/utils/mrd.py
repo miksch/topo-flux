@@ -151,7 +151,7 @@ def mrd_gpu(a, b, M=None):
     return cp.asnumpy(T), cp.asnumpy(cp.flip(D))
 
 @njit
-def mrd_numba(a, b, M=0):
+def mrd_numba(a, b, M=-7999):
     """
     Calculate the Multiresolution Decomposition for a given timeseries of two variables
     Howell and Mahrt, 1997; Vickers and Mahrt, 2003; Vickers and Mahrt 2006
@@ -167,7 +167,7 @@ def mrd_numba(a, b, M=0):
     """
 
     # Initialize shape of output spectra if none given
-    if M==0:
+    if M==-7999:
         N = a.shape[0]     
         M = int(np.floor(np.log2(N)))
 
