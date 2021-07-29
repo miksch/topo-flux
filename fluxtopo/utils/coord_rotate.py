@@ -99,19 +99,27 @@ def yaw_correct(wind_vect, return_angle=False):
 
 
 
-def yaw_angle(u, v):
+def yaw_angle(u, v, degrees=True):
     """
     Returns yaw angle given two vectors: u and v
     """
+    angle = np.arctan(u/v)
 
-    return np.arctan(u/v)
+    if degrees:
+        return angle * (180/np.pi)
+    else:
+        return angle
 
-def pitch_angle(u, v, w):
+def pitch_angle(u, v, w, degrees=True):
     """
     Returns pitch angle given angles u, v, and w
     """
+    angle = np.arctan(w/np.sqrt(u**2 + v**2))
 
-    return np.arctan(w/(u**2 + v**2 + w**2))
+    if degrees:
+        return angle * (180/np.pi)
+    else:
+        return angle
 
 def _double_rotate_pd_rotations(df):
     """
