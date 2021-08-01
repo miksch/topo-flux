@@ -134,14 +134,14 @@ def _double_rotate_pd_rotations(df):
 
     return pd.DataFrame(wind_vect2, index=df.index, columns=new_cols)
 
-def double_rotate_pd(df, time_freq, u_meas='Ux', v_meas='Uy', w_meas='Uz', ts_meas='t_sonic'):
+def double_rotate_pd(df, time_freq='5T', u_meas='Ux', v_meas='Uy', w_meas='Uz', ts_meas='t_sonic'):
     """
     Calculate double rotated velocities
     """
     #Split data into groups dictated by time_freq
     # did .groupby(pd.Grouper(freq='5T', closed='right', label='right'), group_keys=False)
     # in previous code... not sure why
-    df_meas_grouped = df.groupby(pd.Grouper(freq='5T', closed='right', label='right'), group_keys=False)
+    df_meas_grouped = df.groupby(pd.Grouper(freq=time_freq, closed='right', label='right'), group_keys=False)
     
     test_grouped = df_meas_grouped.apply(_double_rotate_pd_rotations)
 
